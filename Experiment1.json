@@ -1,0 +1,168 @@
+# %%
+%pip install scikit-learn
+
+# %%
+pip install pandas
+
+# %%
+pip install matplotlib
+
+# %%
+# DATA PREPARATION
+
+
+from sklearn.datasets import load_diabetes
+import pandas as pd
+import matplotlib.pyplot as plt
+X, y = load_diabetes(return_X_y = True, as_frame=True)
+dataview = load_diabetes(as_frame=True) #this to preview it as a frame
+#Each row of dataset is all values for 1 person, so age, sex, bmi,... see more at https://scikit-learn.org/stable/datasets/toy_dataset.html#diabetes-dataset
+
+# Data extraction from dataset
+x_data = X[['bmi']]
+
+# %%
+# Extracting certain columns from the dataset --> X has to be a datframe --> as_frame = True
+
+# %%
+def correction():
+    import matplotlib.pyplot as plt
+    plt.scatter(X['bmi'],y)
+    plt.xlabel("BMI")
+    plt.ylabel("DIABETES PROGRESSION")
+    #THIS IS SCATTERING GIVEN DATA: X-AXIS SHOWS AGE, Y-AXIS SHOWS BMI
+
+# %%
+def KNearestneighbour(): #SEEMS A MORE ACCURATE MODEL
+    bsize = best_train_size_nearestneighbor
+    print(f"bsize: {bsize}")
+
+    # Split data in TRAINING and TESTING data
+
+    from sklearn.model_selection import train_test_split
+    x_train, x_test, y_train, y_test = train_test_split(x_data,y, test_size= bsize, random_state=2)
+
+    # Model prep
+
+    from sklearn.neighbors import KNeighborsRegressor
+    model = KNeighborsRegressor(n_neighbors=4)
+    model.fit(x_train,y_train)
+
+    # Define prediction
+
+    pred = model.predict(x_test)
+
+    # Evaluate model
+
+    score = model.score(x_test, y_test)
+    print(score)
+
+    # Plot results
+    
+    plt.scatter(x_train, y_train) #trained data (x) and correction (y)
+    plt.scatter(x_test,pred, color = "red", label= "Model Prediction") #tested data (x) and PREDICITON (y)
+    plt.scatter(x_test,y_test, color = "green", label = "True answers") #tested data (x) and CORRECTION (y)
+    plt.legend()
+
+# %%
+def LinearProject(): #SEEMS A MORE ACCURATE MODEL
+    asize = best_train_size_linear
+    # Split data in TRAINING and TESTING data
+
+    from sklearn.model_selection import train_test_split
+    x_train, x_test, y_train, y_test = train_test_split(x_data,y, test_size= asize, random_state=2)
+
+    # Model prep
+
+    from sklearn.linear_model import LinearRegression
+    model = LinearRegression()
+    model.fit(x_train,y_train)
+
+    # Define prediction
+
+    pred = model.predict(x_test)
+
+    # Evaluate model
+
+    score = model.score(x_test, y_test)
+    print(score)
+
+    # Plot results
+    plt.scatter(x_train, y_train) #trained data (x) and correction (y)
+    plt.scatter(x_test,pred, color = "red", label= "Model Prediction") #tested data (x) and PREDICITON (y)
+    plt.scatter(x_test,y_test, color = "green", label = "True answers") #tested data (x) and CORRECTION (y)
+    plt.legend()
+
+# %%
+def best_train_test_split_size_linear():
+    # Finding best training size
+    weight = 0.01
+    global best_train_size_linear
+    best_train_size_linear = 0
+    highest_score = 0
+    for i in range(1,100):
+
+        # Split data in TRAINING and TESTING data
+
+        from sklearn.model_selection import train_test_split
+        x_train, x_test, y_train, y_test = train_test_split(x_data,y, test_size= weight, random_state=2)
+    
+    # Model prep
+        from sklearn.linear_model import LinearRegression
+        model = LinearRegression()
+        model.fit(x_train,y_train)
+        # Define prediction
+        pred = model.predict(x_test)
+        # Evaluate model
+        score = model.score(x_test, y_test)
+
+        # Analyze loss
+
+        if score>highest_score:
+            highest_score = score
+            best_train_size_linear = weight
+        weight+=0.01
+    print(f"Best split size: {best_train_size_linear}")
+    print(f"Highest accuracy: {highest_score}")
+    LinearProject()
+
+# %%
+def best_train_test_split_size_nearestneighbor():
+    # Finding best training size
+    weight = 0.01
+    global best_train_size_nearestneighbor
+    best_train_size_nearestneighbor = 0
+    highest_score = 0
+    for i in range(1,100):
+
+        # Split data in TRAINING and TESTING data
+
+        from sklearn.model_selection import train_test_split
+        x_train, x_test, y_train, y_test = train_test_split(x_data,y, test_size= weight, random_state=2)
+        
+        # Model prep
+        from sklearn.neighbors import KNeighborsRegressor
+        model = KNeighborsRegressor(n_neighbors=4)
+        model.fit(x_train,y_train)
+        # Define prediction
+        pred = model.predict(x_test)
+        # Evaluate model
+        score = model.score(x_test, y_test)
+
+        # Analyze loss
+
+        if score>highest_score:
+            highest_score = score
+            best_train_size_nearestneighbor = weight
+        weight+=0.01
+    print(f"Best split size: {best_train_size_nearestneighbor}")
+    print(f"Highest accuracy: {highest_score}")
+    KNearestneighbour()
+
+# %%
+best_train_test_split_size_linear()
+
+# %%
+best_train_test_split_size_nearestneighbor()
+
+
